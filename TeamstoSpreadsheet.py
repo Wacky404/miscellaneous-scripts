@@ -11,6 +11,27 @@ num_to_col = {
     4: 'E',
     5: 'F',
 }
+Organization = [
+    'University of Arkansas System Division of Agriculture',
+    'University of Arkansas Grantham',
+    'University of Arkansas forMedical Sciences',
+    'University of Arkansas for Medical Sciences',
+    'University of Arkansas atPine Bluff',
+    'University of Arkansas at Pine Bluff',
+    'University of Arkansas atMonticello',
+    'University of Arkansas at Monticello',
+    'University of Arkansas',
+    'University Arkansas Community College Morrilton',
+    'UAHT.EDU',
+    'UACCB',
+    'UA Rich Mountain',
+    'UA Little Rock',
+    'UA Cossatot',
+    'UA - Pulaski Technical College',
+    'Phillips Community College',
+    'ASMSA',
+    'University of Arkansas System Office',
+]
 sheet_names = [
     'Change Management',
     'Comms and Resources',
@@ -71,3 +92,38 @@ for sheet in sheet_names:
                     ws_change_management['A' + str(row[0].row)].value = None
                     wb_members.save(file)
                     break
+
+    # going to write a script that sorts the columns data to their respective column
+    for row in ws_change_management.iter_rows(min_row=1, min_col=1, max_col=5):
+        i = 0
+        while i < 4:
+            if row[i].value == 'Member':
+                ws_change_management[str(num_to_col[i + 1]) + str(row[i].row)].value = 'N/A'
+                ws_change_management['E' + str(row[i].row)].value = 'Member'
+            i += 1
+    wb_members.save(file)
+    for cell in ws_change_management['D']:
+        word = str(cell.value)
+        if word == 'Member':
+            ws_change_management['D' + str(cell.row)].value = 'N/A'
+    wb_members.save(file)
+    for row in ws_change_management.iter_rows(min_row=1, min_col=1, max_col=5):
+        i = 0
+        while i < 4:
+            if row[i].value is None:
+                ws_change_management[str(num_to_col[i + 1]) + str(row[i].row)].value = 'N/A'
+            i += 1
+    # check columns B and move organization to C if found
+    for cell in ws_change_management['B']:
+        word = str(cell.value)
+        for match in Organization:
+            if match == word:
+                data_in_c = ws_change_management['C' + str(cell.row)].value
+                if data_in_c == 'N/A':
+                    ws_change_management['C' + str(cell.row)].value = match
+                    ws_change_management['B' + str(cell.row)].value = 'N/A'
+                else:
+                    ws_change_management['D' + str(cell.row)].value = data_in_c
+                    ws_change_management['C' + str(cell.row)].value = match
+                    ws_change_management['B' + str(cell.row)].value = 'N/A'
+    wb_members.save(file)
